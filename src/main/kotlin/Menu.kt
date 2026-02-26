@@ -16,7 +16,9 @@ fun displayWelcomeMenu()
 {
     println("1. Look Up Contact by first name")
     println("2. Add contact")
-    println("3. Exit")
+    println("3. Update Contact")
+    println("4. Delete contact")
+    println("5. Exit")
 }
 
 suspend fun lookUpContact() {
@@ -24,12 +26,20 @@ suspend fun lookUpContact() {
     println("Please enter the first name")
     var firstName = readln()
     val contact = contactRepository.getContactByName(firstName)
-    println("Name: ${contact?.nameFirst}" +
-            " ${if (contact?.nameMiddle == null) contact?.nameMiddle else ""}" +
-            " ${contact?.nameLast}")
-    println("Email: ${contact?.email}")
-    println("Phone: ${contact?.phoneNumber}")
-    println("Address: ${contact?.address}")
+    if (contact == null) {
+        println("Contact not found.")
+    }
+    else {
+
+        println(
+        "Name: ${contact?.nameFirst}" +
+                " ${if (contact?.nameMiddle == null) contact?.nameMiddle else ""}" +
+                " ${contact?.nameLast}"
+        )
+        println("Email: ${contact?.email}")
+        println("Phone: ${contact?.phoneNumber}")
+        println("Address: ${contact?.address}")
+    }
 }
 
 suspend fun addContact() {
@@ -57,11 +67,82 @@ suspend fun addContact() {
         address = address
     )
 
-    contactRepository.AddContact(newContact)
+    contactRepository.addContact(newContact)
 
 
 }
 
+
+suspend fun updateContact()
+{
+    var contact: Contact? = null
+    while (contact == null) {
+        println("Enter the name of the contact you want to update? ")
+        val contactToLookUp = readln()
+
+        contact = contactRepository.getContactByName(contactToLookUp)
+
+        if (contact == null) {
+            println("No contact found")
+        }
+    }
+    val contactId = contact.id!!
+
+    var columnToUpdate = ""
+    println("Please enter what you want to update")
+    println("1. First Name 2. Middle Name 3. Last Name 4. Email 5. phoneNumber 6. Address")
+    var userInput = readln()
+    when (userInput) {
+        "1" -> columnToUpdate = "first_name"
+        "2" -> columnToUpdate = "middle_name"
+        "3" -> columnToUpdate = "last_name"
+        "4" -> columnToUpdate = "email"
+        "5" -> columnToUpdate = "phone_number"
+        "6" -> columnToUpdate = "address"
+    }
+
+    println("What would you like to change $columnToUpdate to? ")
+    val itemToChange = readln()
+
+    contactRepository.updateContact(columnToUpdate, itemToChange,contactId)
+
+    println("Contact updated!")
+    println("\n")
+}
+
+ suspend fun deleteContact() {
+
+    var contact: Contact? = null
+    while (contact == null) {
+        println("Enter the name of the contact you want to Delete? ")
+        val contactToLookUp = readln()
+
+        contact = contactRepository.getContactByName(contactToLookUp)
+
+        if (contact == null) {
+            println("No contact found")
+        }
+    }
+    val contactId = contact.id!!
+
+     var isAuthorized = false
+
+     while(!isAuthorized) {
+         println("Are you sure you want to delete ${contact.nameFirst}  ${contact.nameMiddle}  ${contact.nameLast} 's Contact? Yes/No?")
+         val userDecision = readln()
+         val decision = userDecision.lowercase()
+         if (decision == "yes") {
+             isAuthorized = true
+         }
+         else if (decision == "no") {
+             return
+         }
+     }
+
+     contactRepository.deleteContact(contactId)
+     println("Contact Deleted!")
+
+}
 
 fun main() {
 
@@ -75,7 +156,9 @@ fun main() {
         when (selection) {
             "1" -> runBlocking { lookUpContact() }
             "2" -> runBlocking { addContact() }
-            "3" -> done = true
+            "3" -> runBlocking { updateContact() }
+            "4" -> runBlocking { deleteContact() }
+            "5" -> done = true
         }
     }
 }

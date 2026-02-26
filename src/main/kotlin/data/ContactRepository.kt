@@ -15,7 +15,7 @@ object contactRepository {
     }
 
 
-    suspend fun AddContact(contact: Contact) {
+    suspend fun addContact(contact: Contact) {
 
         val contactToAdd = Contact(
             nameFirst = contact.nameFirst,
@@ -26,5 +26,25 @@ object contactRepository {
             address = contact.address
         )
         supabase.from("Contacts").insert(contactToAdd)
+    }
+
+    suspend fun updateContact(columnToChange: String, newValue: String, contactId: Long) {
+        supabase.from("Contacts").update(
+            {
+                set(columnToChange, newValue)
+            }
+        ) {
+            filter {
+                eq("id", contactId)
+            }
+        }
+    }
+
+    suspend fun deleteContact(contactId: Long) {
+        supabase.from("Contacts").delete {
+            filter {
+                eq("id", contactId)
+            }
+        }
     }
 }
