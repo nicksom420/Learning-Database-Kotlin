@@ -33,7 +33,7 @@ suspend fun lookUpContact() {
 
         println(
         "Name: ${contact?.nameFirst}" +
-                " ${if (contact?.nameMiddle == null) contact?.nameMiddle else ""}" +
+                " ${if (contact?.nameMiddle == null) "" else contact.nameMiddle}" +
                 " ${contact?.nameLast}"
         )
         println("Email: ${contact?.email}")
